@@ -140,12 +140,31 @@ local function clickActiveGoBack()
     end
 end
 
+-- Auto Farm с проверкой позиции и кулдауном 4.8 секунд
+local lastGoBackClick = 0
 task.spawn(function()
+    local farmTargetPos = Vector3.new(137, 87, -1)
     while true do
         if isFarmEnabled and not isBossFighting then
-            clickActiveGoBack()
+            pcall(function()
+                local char = LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    if (hrp.Position - farmTargetPos).Magnitude > 10 then
+                        task.wait(5)
+                        if isFarmEnabled and not isBossFighting then
+                            hrp.CFrame = CFrame.new(farmTargetPos)
+                        end
+                    end
+                end
+            end)
+
+            if os.clock() - lastGoBackClick >= 4 then
+                clickActiveGoBack()
+                lastGoBackClick = os.clock()
+            end
         end
-        task.wait(5)
+        task.wait(0.2)
     end
 end)
 
